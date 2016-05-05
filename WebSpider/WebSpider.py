@@ -5,13 +5,13 @@ import os.path
 import wget
 import sys
 import shutil
+import re
 
 saveToFolder = ''
 if(len(sys.argv) == 2):
     saveToFolder = sys.argv[1]
-
-if(not os.path.exists(saveToFolder)):
-    os.mkdir(saveToFolder)
+    if(not os.path.exists(saveToFolder)):
+        os.mkdir(saveToFolder)
 
 if(not os.path.isfile("base.page")):
     print 'file base.page dosen\'t exit...'
@@ -44,7 +44,15 @@ for tag in content:
                     bigImageUrl = imTag.attrs['href']
             if(len(bigImageUrl)>0):
                 currFileName = wget.download(bigImageUrl)
-                shutil.copyfile(currFileName.decode('utf8'),os.path.join(saveToFolder,saveFile))
+                if(len(saveToFolder)>0):
+                    destFile = os.path.join(saveToFolder,saveFile)
+                    index = 1
+                    while(os.path.exists(destFile)):
+                        destFile = destFile.replace('.jpg',str(index)+'.jpg')
+                        index = index + 1
+                    destFile = re.sub('[*?"<>|]', '_',destFile)
+                    shutil.copyfile(currFileName.decode('utf8'),destFile)
+                    #os.remove(currFileName)
                 allDownloadedFiles.append(currFileName)
                     
             
